@@ -12,9 +12,14 @@ function Formodel(options){
     this.handleError = options.handleError || function(){};
     this.handleBeforeSend = options.handleBeforeSend || function(){};
     this.handleSuccess = options.handleSuccess || function(){};
+    this.targetBefore = options.targetBefore || function(){};
+    this.targetAfter = options.targetAfter || function(){};
     this.recordId = -1;
     this.clearAfterStore = options.clearAfterStore || true;
     this.clearAfterUpdate = options.clearAfterUpdate || true;
+    this.usingTemplates = options.usingTemplates || true;
+    this.target = null;
+    this.targetOriginal = null;
     this._init();
 }
 
@@ -22,6 +27,150 @@ Formodel.templates = {
     loading:'<i class="fa fa-spinner faa-spin animated"></i>',
     success:'<i class="fa fa-eye"></i>',
     error:'<i class="fa fa-exclamation-triangle"></i>'
+};
+
+Formodel.prototype.clear = function(){
+    var attributes = this.getAttributes();
+    for(var key in attributes){
+        this.fillInput(attributes[key], key, '');
+    }
+};
+
+Formodel.prototype.get = function (id, target) {
+    this.setTarget(target);
+    this.setRecordId(id);
+    var data = this.getAjaxData(),
+        url = this.getUrl(this.getRecordId());
+    this._ajax(url, 'GET', data, this._handleGet);
+};
+
+Formodel.prototype.new = function () {
+    this.setRecordId(-1);
+    this.clear();
+};
+
+Formodel.prototype.destroy = function (target) {
+    this.setTarget(target);
+    if(this.getRecordId() > -1){
+        var url = this.getUrl(this.getRecordId()),
+            data = this.getFormData();
+        this._ajax(url, 'DELETE', data, this._handleDelete);
+    }
+};
+
+Formodel.prototype.save = function(target) {
+    this.setTarget(target);
+    if(this.getRecordId() > 0){
+        this._update();
+    } else {
+        this._store();
+    }
+}
+
+
+
+Formodel.prototype._ajax = function(url, type, data, handler) {
+    var context = this;
+    data = this.getAjaxData(data);
+    $.ajax({
+        url:url,
+        type:type,
+        data:data,
+        beforeSend:function(){
+            context.handleBeforeSend(context);
+            context._targetBefore();
+            if(context.usingTemplates){
+                context._setTargetTemplate('loading');
+            }
+        },
+        success:function(response){
+            context._targetAfter(true, response);
+            context.handleSuccess(context, response);
+            if(context.usingTemplates){
+                context._setTargetTemplate(null);
+            }
+            handler(context, response);
+        },
+        error:function(response){
+            context._targetAfter(false, response);
+            context.handleError(context, response);
+            if(context.usingTemplates){
+                context._setTargetTemplate('error');
+            }
+        },
+    });
+};
+
+Formodel.prototype._init = function() {
+    var context = this;
+    this.getForm().submit(function(e){
+        e.preventDefault();
+        context.save();
+    });
+}
+
+Formodel.prototype._update = function() {
+    var url = this.getUrl(this.getRecordId()),
+        data = this.getFormData();
+    this._ajax(url, 'PUT', data, this._handleUpdate);
+};
+
+Formodel.prototype._store = function() {
+    var url = this.getUrl(),
+        data = this.getFormData();
+    this._ajax(url, 'POST', data, this._handleStore);
+};
+
+Formodel.prototype._setTargetTemplate = function(template) {
+    if(this.target !== null && this.target !== undefined){
+        if(template !== undefined && template !== null){
+            if($(this.target).attr('data-original') == null || $(this.target).attr('data-original') == '' || $(this.target).attr('data-original') === undefined ){
+                $(this.target).attr('data-original', $(this.target).html());
+            }
+            $(this.target).html(Formodel.templates[template]);
+        } else {
+            $(this.target).html($(this.target).attr('data-original'));
+        }
+    }
+}
+
+Formodel.prototype.setTarget = function (target) {
+    if(target === undefined || target == null || target == ''){
+        target = null
+    }
+    this.target = target;
+};
+
+Formodel.prototype._targetAfter = function(success, response) {
+    this.targetAfter(this.target, success, response);
+}
+
+Formodel.prototype._targetBefore = function() {
+    this.targetBefore(this.target);
+}
+
+Formodel.prototype.getInputValue = function (tag, name) {
+    switch (tag.toLowerCase()) {
+        case 'checkbox':
+        case 'radio':
+            break;
+        default:
+            var selector = tag + '[name="' + name + '"]';
+            return $(selector).val().trim();
+    }
+};
+
+Formodel.prototype.getFormData = function (idKey) {
+    var data = {},
+        attributes = this.getAttributes();
+    for(var key in attributes){
+        var value = this.getInputValue(attributes[key], key);
+        data[key] = value;
+    }
+    if(idKey !== undefined){
+        data[idKey] = this.getRecordId();
+    }
+    return data;
 };
 
 Formodel.prototype.getForm = function () {
@@ -52,32 +201,39 @@ Formodel.prototype.getAjaxData = function (datas) {
     return datas;
 }
 
-Formodel.prototype.get = function (id) {
-    this.recordId = id;
-    var data = this.getAjaxData(),
-        url = this.getUrl(id);
-    this._ajax(url, 'GET', data, this.handleGet);
+Formodel.prototype.getRecordId = function () {
+    return parseInt(this.recordId);
 };
 
-Formodel.prototype.fillWith = function (record) {
-    console.log(record);
-    var attributes = this.getAttributes();
-    for(var key in attributes){
-        this.fillInput(attributes[key], key, record[key]);
+Formodel.prototype._handleUpdate = function(context, response){
+    if(context.clearAfterUpdate){
+        context.new();
     }
+    context.handleUpdate(context, response);
 };
 
-Formodel.prototype.clear = function(){
-    var attributes = this.getAttributes();
-    for(var key in attributes){
-        this.fillInput(attributes[key], key, '');
+Formodel.prototype._handleStore = function(context, response){
+    if(context.clearAfterStore){
+        context.new();
     }
+    context.handleStore(context, response);
 };
 
-Formodel.prototype.new = function () {
-    this.recordId = -1;
-    this.clear();
+Formodel.prototype._handleDelete = function(context, response){
+    context.new();
+    context.handleDelete(context, response);
 };
+
+Formodel.prototype._handleGet = function (context, response) {
+    context.fillWith(response);
+    context.handleGet(context, response);
+};
+
+Formodel.prototype.setRecordId = function (id) {
+    id = parseInt(id);
+    this.recordId = (id !== undefined && id !== null && id > -1 && !isNaN(id)) ? id : -1;
+};
+
 
 Formodel.prototype.fillInput = function (tag, name, value) {
     switch (tag.toLowerCase()) {
@@ -86,156 +242,12 @@ Formodel.prototype.fillInput = function (tag, name, value) {
             break;
         default:
             var selector = tag + '[name="' + name + '"]';
-            console.log($(selector).val(value.trim()));
+            $(selector).val(value.trim());
     }
 };
-
-Formodel.prototype.getInputValue = function (tag, name) {
-    switch (tag.toLowerCase()) {
-        case 'checkbox':
-        case 'radio':
-            break;
-        default:
-            var selector = tag + '[name="' + name + '"]';
-            return $(selector).val().trim();
-    }
-};
-
-Formodel.prototype.getFormData = function () {
-    var data = {},
-        attributes = this.getAttributes();
+Formodel.prototype.fillWith = function (record) {
+    var attributes = this.getAttributes();
     for(var key in attributes){
-        var value = this.getInputValue(attributes[key], key);
-        data[key] = value;
-    }
-    return data;
-};
-
-Formodel.prototype.save = function() {
-    console.log(this.getFormData());
-}
-
-Formodel.prototype._init = function() {
-    var context = this;
-    this.getForm().submit(function(e){
-        e.preventDefault();
-        context.save();
-    });
-}
-
-Formodel.prototype._ajax = function(url, type, data, handler) {
-    var context = this;
-    $.ajax({
-        url:url,
-        type:type,
-        data:data,
-        beforeSend:function(){
-            context.handleBeforeSend(context);
-        },
-        success:function(response){
-            if(type == 'GET'){
-                context.fillWith(response);
-            }
-            context.handleSuccess(context, response);
-            handler(context, response);
-        },
-        error:function(response){
-            context.handleError(context, response);
-        },
-    });
-}
-
-/*function Formodel(modal, model, attributes){
-    this.modal = modal;
-    this.model = model;
-    this.attributes = attributes;
-    this.currentElement = undefined;
-}
-
-Formodel.templates = {
-    loading:'<i class="fa fa-spinner faa-spin animated"></i>',
-    success:'<i class="fa fa-eye"></i>',
-    error:'<i class="fa fa-exclamation-triangle"></i>'
-}
-
-Formodel.prototype.getModal = function () {
-    return $('#'+this.modal);
-};
-
-Formodel.prototype.getAttributes = function () {
-    return this.attributes;
-};
-
-Formodel.prototype.getUrl = function (id) {
-    return '/'+this.model+'/'+(id || '');
-};
-
-Formodel.prototype.getCurrentElement = function() {
-    return $(this.currentElement);
-}
-
-Formodel.prototype.setId = function (id) {
-    var modal = this.getModal(),
-        form = modal.find('form');
-    modal.find('input[name="record_id"]').val(id);
-    if(id > -1){
-        form.attr('action', form.attr('action')+id);
-    }
-    else{
-        form.attr('action', form.attr('data-baseurl'));
+        this.fillInput(attributes[key], key, record[key]);
     }
 };
-
-Formodel.prototype.fill = function (record) {
-    var modal = this.getModal(),
-        head = modal.find('.modal-header'),
-        body = modal.find('.modal-body'),
-        update = (record !== undefined);
-
-    this.setId(update ? record.id : -1);
-    $.each(this.attributes, function(i,v){
-        if(v != 'checkbox' && v != 'radio'){
-            var value = (update) ? record[i] : '',
-                element = v+'[name="'+i+'"]';
-            if(value == '' && v == 'select'){
-                value = $(element).find('option:first').val();
-            }
-            body.find(element).val(value);
-            body.find(element).change();
-        }
-        else{
-            var element = 'input[type="'+v+'"][name="'+i+'"]';
-            body.find(element).bootstrapToggle((record !== undefined && record[i] == 1) ? 'on' : 'off');
-        }
-    });
-    modal.modal();
-};
-
-Formodel.prototype.get = function (id, element) {
-    var self = this;
-    this.currentElement = element || '';
-    $.ajax({
-        url:self.getUrl(id),
-        type:'GET',
-        success:function(response){
-            self.handleSuccess(self, response);
-        },
-        error:function(response){
-            self.handleError(self, response);
-        },
-        beforeSend:function(){
-            self.handleBeforeSend(self);
-        },
-    });
-};
-
-Formodel.prototype.handleSuccess = function(context, response){
-    context.getCurrentElement().html(Formodel.templates.success);
-    context.fill(response);
-}
-Formodel.prototype.handleError = function(context, response){
-    context.getCurrentElement().html(Formodel.templates.error);
-}
-Formodel.prototype.handleBeforeSend = function(context){
-    context.getCurrentElement().html(Formodel.templates.loading);
-}*/
