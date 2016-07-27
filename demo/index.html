@@ -84,14 +84,6 @@
                     attributes:{
                         title:'input',
                         body:'textarea'
-                    },
-                    targetBefore:function(target){
-                        console.log(target);
-                        $(target).attr('disabled',true);
-                    },
-                    targetAfter: function(target, success, response) {
-                        console.log(target);
-                        $(target).attr('disabled', false);
                     }
                 });
         </script>

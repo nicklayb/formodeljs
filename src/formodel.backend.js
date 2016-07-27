@@ -36,7 +36,7 @@ Formodel.prototype._init = function() {
     var context = this;
     this.getForm().submit(function(e){
         e.preventDefault();
-        context.save();
+        context.save($(this).find('button[type="submit"]'));
     });
 }
 
