@@ -4,7 +4,7 @@
         <meta charset="utf-8">
         <title>Formodel demo</title>
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" charset="utf-8">
-        <script src="https://code.jquery.com/jquery-3.1.0.min.js" integrity="sha256-cCueBR6CsyA4/9szpPfrX3s49M9vUU5BgtiJj06wt/s=" crossorigin="anonymous"></script>
+        <script src="https://code.jquery.com/jquery-2.2.4.min.js" ></script>
         <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" charset="utf-8"></script>
         <script src="../dist/formodel.min.js" charset="utf-8"></script>
     </head>
@@ -14,9 +14,10 @@
                 <div class="col-md-3">
                     <label for="">Lookup:</label>
                     <input type="text" name="lookup" value="" class="form-control">
+                    <button type="button" name="button" class="btn btn-primary" onclick="model.get($('input[name=\'lookup\']').val())">Search</button>
                 </div>
             </div>
-            <form data-model="">
+            <form data-model="posts" id="formodel">
                 <div class="row">
                     <div class="col-md-12">
                         <label for="title">Title:</label>
@@ -24,11 +25,10 @@
                     </div>
                     <div class="col-md-12">
                         <label for="body">Body:</label>
-                        <textarea name="body" value="" class="form-control">
-                        </textarea>
+                        <textarea name="body" value="" class="form-control"></textarea>
                     </div>
                     <div class="col-md-6">
-                        <button type="button" class="btn btn-primary" name="button">New</button>
+                        <button type="button" class="btn btn-primary" name="button" onclick="model.new()">New</button>
                     </div>
                     <div class="col-md-6 text-right">
                         <button type="submit" class="btn btn-primary" name="button">Submit</button>
@@ -36,5 +36,18 @@
                 </div>
             </form>
         </div>
+        <script type="text/javascript">
+            var model = new Formodel({
+                    form:'formodel',
+                    rootUrl:'http://jsonplaceholder.typicode.com/',
+                    attributes:{
+                        title:'input',
+                        body:'textarea'
+                    },
+                    handleGet: function(context, record){
+                        console.log(record);
+                    }
+                });
+        </script>
     </body>
 </html>
