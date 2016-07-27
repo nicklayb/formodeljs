@@ -1,0 +1,35 @@
+{
+  "name": "formodeljs",
+  "version": "1.0.0",
+  "description": "Javascript library for RESTful api form manipulation with your database model",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "devDependencies": {
+    "gulp": "^3.9.1",
+    "gulp-concat": "^2.6.0",
+    "gulp-jshint": "^2.0.1",
+    "gulp-minify": "0.0.13",
+    "gulp-rename": "^1.2.2",
+    "gulp-uglify": "^1.5.4",
+    "jshint": "^2.9.2"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nicklayb/formodeljs.git"
+  },
+  "keywords": [
+    "form",
+    "model",
+    "javascript",
+    "filling",
+    "record"
+  ],
+  "author": "Nicolas Boisvert",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/nicklayb/formodeljs/issues"
+  },
+  "homepage": "https://github.com/nicklayb/formodeljs#readme"
+}
