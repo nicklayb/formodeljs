@@ -1,4 +1,6 @@
-function Formodel(modal, model, attributes){
+
+
+/*function Formodel(modal, model, attributes){
     this.modal = modal;
     this.model = model;
     this.attributes = attributes;
@@ -91,4 +93,4 @@ Formodel.prototype.handleError = function(context, response){
 }
 Formodel.prototype.handleBeforeSend = function(context){
     context.getCurrentElement().html(Formodel.templates.loading);
-}
+}*/
