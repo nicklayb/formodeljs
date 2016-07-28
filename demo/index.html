@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>Formodel demo</title>
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" charset="utf-8">
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css" charset="utf-8">
+        <script src="https://code.jquery.com/jquery-2.2.4.min.js" ></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" charset="utf-8"></script>
+        <script src="../dist/formodel.min.js" charset="utf-8"></script>
+    </head>
+    <body>
+        <div class="jumbotron">
+            <div class="container">
+                <h1>Formodel.js demo</h1>
+            </div>
+        </div>
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4">
+                    <h4>Default API</h4>
+                    <p>The default demo comes with a free test API from <a href="http://jsonplaceholder.typicode.com/">jsonplaceholder.typicode.com/</a>. Update, store and delete request will result of a succes but won't be persisted in the database.</p>
+                    <p>For better result, we recommand you to use an api that you built to see if it persist through the database</p>
+                    <h4>Try the following to test</h4>
+                    <ul>
+                        <li>Enter an ID into the <code>lookup</code> box and see the form being filled by the id</li>
+                        <li>Modify anything in the form and press <code>Submit</code>. Since you already loaded a record, the request will update the record</li>
+                        <li>Click <code>New</code>, fill in some data and click <code>Submit</code>. The <code>new</code> method is reseting the id, then, it'll store insteand of updating the request</li>
+                        <li>Click the <code>Delete</code> button after you looked up an existing record. It'll be deleted</li>
+                    </ul>
+                </div>
+                <div class="col-md-8">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label for="">Lookup:</label>
+                            <div class="input-group">
+                                <input type="text" name="lookup" value="" class="form-control">
+                                <span class="input-group-btn">
+                                    <button type="button" name="button" class="btn btn-primary" onclick="model.get($('input[name=\'lookup\']').val(), this)">Search</button>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    <hr/>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <form data-model="posts" id="formodel">
+                                <div class="panel panel-primary">
+                                    <div class="panel-heading">Post</div>
+                                    <div class="panel-body">
+                                        <div class="row">
+                                            <div class="col-md-12">
+                                                <label for="title">Title:</label>
+                                                <input type="text" name="title" value="" class="form-control">
+                                            </div>
+                                            <div class="col-md-12">
+                                                <label for="body">Body:</label>
+                                                <textarea name="body" value="" class="form-control"></textarea>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="panel-footer">
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <button type="button" class="btn btn-primary" name="button" onclick="model.new(this)">New</button>
+                                            </div>
+                                            <div class="col-md-6 text-right">
+                                                <button type="button" name="button" class="btn btn-danger" onclick="model.destroy(this)">Delete</button>
+                                                <button type="submit" class="btn btn-primary" name="button">Submit</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <script type="text/javascript">
+            var model = new Formodel({
+                    form:'formodel',
+                    rootUrl:'http://goodtime.dev',
+                    attributes:{
+                        title:'input',
+                        body:'textarea'
+                    }
+                });
+        </script>
+    </body>
+</html>
