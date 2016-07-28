@@ -3,13 +3,16 @@
 
 ### Javascript library for RESTful api form manipulation with your database model
 
-This should be use when you wanna manage datatables and quick record edition from your RESTful api. Let's say for example that you have a datatable containing all of your user. Of course you could just make a "show" page where you show you user and another page where you can add new user. But the thing is that you need to do 2 more page for an action that basically requires the same data. If you add the page reload time and stuff like that, it's starts being a pain.
+##### Purposes
 
-What I suggest you is to use only **form** for two or more model action. For now, you must use it in a Boostrap's modal.
+You can easily manage asynchronous record management to your database on a RESTful API. With easy methods like `.get(1)`, `.new()` and `.save()`,  you'll be able to call your api with the informations you need.
+
+##### Options
+
+You can customize a lot of the thing, like callbacks, error list or event error status code. You can use the `.handleGet()` to configure special things after a get is done like, for example, poping a modal. You specify a CSRF token if you need to. All the tests are done with a Laravel API, a lot of stuff are already configured to match it.
 
 ### Requirements
 - Jquery v.2+
-- Bootstrap v.3
 
 ## Installation
 
@@ -17,76 +20,73 @@ What I suggest you is to use only **form** for two or more model action. For now
 
 Just call `npm install formodeljs` in you terminal to install it.
 
-### download
+### Download
 
 Download it from the Github repository.
 
 ## Usage
 
-Let's say you have a user form like the following (The ... represents the rest of the Bootstrap's modal, go check their docs for more info):
+### Basic example
+Let's have a blog post form, with a title and a body for example. The only required stuff are the form `id`, the `data-model` attribute, which is your database model. It'll be used to perform any requests. Don't forget to include your model attributes, sur as our `input` title and our `textarea` for the body.
 ```html
-<div class="modal fade" tabindex="-1" role="dialog" id="userModal">
-    ...
-    <form type="POST">
-        <label for="firstname">Firstname :</label>
-        <input type="text" name="firstname" value="" class="form-control">
-        <label for="lastname">Lastname :</label>
-        <input type="text" name="lastname" value="" class="form-control">
-        <label for="username">Username :</label>
-        <input type="text" name="username" value="" class="form-control">
-        <label for="password">Password :</label>
-        <input type="text" name="password" value="" class="form-control">
-
-        <button type="submit" class="btn btn-primary">Submit</button>
-    </form>
-    ...
-</div>
+<form id="postForm" data-model="posts">
+    <input type="text" name="title">
+    <textarea name="body"></textarea>
+    <button type="submit">Post</button>
+</form>
 ```
 
-Now you need to create an instance of Formodel for this form, here's the syntax.
+To invoke the Formodel object, exectue this in a script tag. You pass in an object for your options. You need at least these two parameters `form` and `attributes`.
 ```js
-var formodel = new Formodel('modalId', 'databaseModel', {
-    'attribute':'type',
-});
-```
-The third parameter is an object of your model field that can be editable by your modal. The key is the column name and the value is the type of input (Which would be textarea for a `text` field)
-
-In our example this would look like this
-```js
-var formodel = new Formodel('userModal', 'users', {
-    'firstname': 'input',
-    'lastname': 'input',
-    'username': 'input',
-});
+    var form = new Formodel({
+        form:'postForm',
+        attributes: {
+            'title':'input',
+            'body':'textarea'
+        }
+    });
 ```
 
-And the whole job is done. Why didn't we add the password? Because you don't the password to be prefilled in you modal.
+And it's done.
 
-#### Fetching a database instance
+#### Create a new post
+To create a new post (Doesn't matter if the form is filled or not), call the `.new()` method. It'll empty up de field so you can fill in a new post. If you configure a `.handleNew(context)` option (context as the current Formodel instance), it'll be executed once the form has been cleared. When you'll call the `.save()` method, Formodel will make a call to `/posts` with a `POST` method to your server to store it.
 
-Let's say for example you want to open a modal for user with the id 1.
-```js
-    formodel.get(1);
-```
-Your modal will popup with the `firstname`, `lastname` and `username` of the user at id 1.
+#### Getting a post
+To get a post, you use the method `.get(1)` with the id of the post you want to have. Formodel will make an ajax call to `/posts/1` with the `GET` method. Once te request will end, the form will be filled. You could add the option `.handleGet(context, response)` to do manipulation once the request is done (The context is the Formodel instance and the response is what the server returned).
 
-It works if your api is RESTful because Formodel does automatically a `GET` of your model at url `/users/1` and it replaces the form `action` attribute to `/users/1` in `POST`
+#### Updating a post
+If you successfully got a post, you can now modify it as you wish. When you'll call the `.save()` method, it'll make an ajax call to your server with a `PUT` method to update at the address `/posts/1`. If you haven't got an existing record before, it'll call to store the new post instead of updating. If you want to perform some special moves after, just add a `.handleUpdate(context, response)` callback to your options.
 
-#### Creating a new instance
+#### Deleting
+Of course, you can't delete something that don't exist. So, once you got an existing post, simply call the `.delete()` method to make a call to `/posts/1` with a `DELETE` method. You could specify a `.handleDelete(context, response)` method to do some special stuff after the record is deleted.
 
-Let's say you want to pop the modal but completly cleared for a new user entry.
-```js
-    formodel.fill();
-```
+### Callbacks
+Formodel already includes a lot of callback that you can use to customize how it's going. Every callback receive a `context` parameter which represents the current Formodel instance. Here's a list of the available callbacks.
 
-Your modal will popup wit all of the attributes empty ready to be filled. It also changes the `action` attribute to `/users` in `POST` so your submission should go to your `store` function in your backend if you respected the RESTful API way.
+##### Methods callbacks
+- `handleUpdate` : Executed after a successful update. It also receives the server response.
+- `handleStore` : Executed after a successful store. It also receives the server response.
+- `handleDelete` : Executed after a successful delete. It also receives the server response.
+- `handleGet` : Executed after a successful get. It also receives the server response with the datas.
+- `handleNew` : Executed after the form has been prepared to be filled.
 
-#### Plans
+##### Ajax callbacks
+These are called at each ajax callbacks.
+- `handleError` : Executed after the server returned an error, it receives the server response. You could use it to display error message.. But for form validation messages, wait, there's more coming to you.
+- `handleBeforeSend` : Executed before the ajax is called.
+- `handleSuccess` : Executed after a successful request. It also receive the response of the server.
 
-I currently plans to update the following
-- Possible to update within an ajax call instead of a form submission which should be faster than reloading the page.
-- Easy callback on ajax callbacks for more possible manipulations.
-- Take apart Formodel from the Bootstrap's modal so it can be used on any form
+##### Target callbacks
+When you are calling the `.get()`, `.new()` or the `.save()` methods. You can pass in a parameter `target` which should represent the target who triggered the method (Like a button for example). Within these callbacks, the first parameter is the `target`.
+- `targetBefore` : Executed before the ajax is done.
+- `targetAfter` : Executed after the request. You'll receive a second parameter which is a boolean if the request succeeded or not. You also receive, as a third parameter, the server response.
+
+### Error list
+At the instanciation of your Formodel object, you can add the id of a ul element as `errorList` option where you want errors to append and easily be shown. You could also add the `appendError` callback if you want to customize the li appendment. It receive the error and it by default return a `'<li>' + error + '</li>'`
+
+### Options
+Along the callbacks, you can also customize the following options.
 
 ## Conclusion
 

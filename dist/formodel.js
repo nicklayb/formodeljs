@@ -202,8 +202,8 @@ Formodel.prototype.getAttributes = function (key) {
 };
 
 Formodel.prototype.getUrl = function (id) {
-    id = id || '';
-    return this.getRootUrl() + '/' + this.getModel() + '/' + id;
+    id = (id !== undefined) ? ('/' + id) : '';
+    return this.getRootUrl() + '/' + this.getModel() + id;
 };
 
 Formodel.prototype.getRootUrl = function() {
