@@ -1,20 +1,20 @@
 Formodel.prototype._handleUpdate = function(context, response){
+    context.handleUpdate(context, response);
     if(context.clearAfterUpdate){
         context.new();
     }
-    context.handleUpdate(context, response);
 };
 
 Formodel.prototype._handleStore = function(context, response){
+    context.handleStore(context, response);
     if(context.clearAfterStore){
         context.new();
     }
-    context.handleStore(context, response);
 };
 
 Formodel.prototype._handleDelete = function(context, response){
-    context.new();
     context.handleDelete(context, response);
+        context.new();
 };
 
 Formodel.prototype._handleGet = function (context, response) {

@@ -19,7 +19,8 @@ Formodel.prototype.getFormData = function (idKey) {
     if(idKey !== undefined){
         data[idKey] = this.getRecordId();
     }
-    return data;
+    this.requestData = data;
+    return this.requestData;
 };
 
 Formodel.prototype.getForm = function () {
@@ -49,6 +50,10 @@ Formodel.prototype.getAjaxData = function (datas) {
     datas[this.tokenKey] = this.token;
     return datas;
 }
+
+Formodel.prototype.getRequestData = function () {
+    return this.requestData;
+};
 
 Formodel.prototype.getRecordId = function () {
     return parseInt(this.recordId);
