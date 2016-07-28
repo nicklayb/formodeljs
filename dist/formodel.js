@@ -163,14 +163,14 @@ Formodel.prototype.getInputValue = function (tag, name) {
     switch (tag.toLowerCase()) {
         case 'checkbox':
             var selector = 'input[type="' + tag + '"][name="' + name + '"]';
-            return $(selector).prop('checked');
+            return this.getForm().find(selector).prop('checked');
         case 'radio':
             var selector = 'input[type="' + tag + '"][name="' + name + '"]';
-            return $(selector).val();
+            return this.getForm().find(selector).val();
             break;
         default:
             var selector = tag + '[name="' + name + '"]';
-            return $(selector).val().trim();
+            return this.getForm().find(selector).val().trim();
     }
 };
 
@@ -280,12 +280,12 @@ Formodel.prototype.fillInput = function (tag, name, value) {
         case 'checkbox':
         case 'radio':
             var selector = 'input[type="' + tag + '"][name="' + name + '"]';
-            $(selector).prop('checked', value).change();
+            this.getForm().find(selector).prop('checked', value).change();
             break;
         default:
             value = (typeof value == 'string') ? value.trim() : value;
             var selector = tag + '[name="' + name + '"]';
-            $(selector).val(value);
+            this.getForm().find(selector).val(value);
     }
 };
 
