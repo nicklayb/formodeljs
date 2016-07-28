@@ -22,8 +22,12 @@ Formodel.prototype.getFormData = function (idKey) {
         attributes = this.getAttributes(),
         idKey = (this.idKey !== undefined && this.idKey != null) ? this.idKey : idKey;
     for(var key in attributes){
-        var value = this.getInputValue(attributes[key], key);
-        data[key] = value || null;
+        if(typeof attributes[key] != 'string'){
+            data[key] = attributes[key].get(this);
+        } else {
+            var value = this.getInputValue(attributes[key], key);
+            data[key] = value || null;
+        }
     }
     if(idKey !== undefined){
         data[idKey] = this.getRecordId();

@@ -37,7 +37,11 @@ Formodel.templates = {
 Formodel.prototype.clear = function(){
     var attributes = this.getAttributes();
     for(var key in attributes){
-        this.fillInput(attributes[key], key, '');
+        if(typeof attributes[key] != 'string') {
+            attributes[key].clear(this);
+        } else {
+            this.fillInput(attributes[key], key, '');
+        }
     }
 };
 
@@ -183,8 +187,12 @@ Formodel.prototype.getFormData = function (idKey) {
         attributes = this.getAttributes(),
         idKey = (this.idKey !== undefined && this.idKey != null) ? this.idKey : idKey;
     for(var key in attributes){
-        var value = this.getInputValue(attributes[key], key);
-        data[key] = value || null;
+        if(typeof attributes[key] != 'string'){
+            data[key] = attributes[key].get(this);
+        } else {
+            var value = this.getInputValue(attributes[key], key);
+            data[key] = value || null;
+        }
     }
     if(idKey !== undefined){
         data[idKey] = this.getRecordId();
@@ -280,13 +288,23 @@ Formodel.prototype.fillInput = function (tag, name, value) {
         case 'checkbox':
         case 'radio':
             var selector = 'input[type="' + tag + '"][name="' + name + '"]';
+            value = (!isNaN(parseInt(value))) ? parseInt(value) : value;
             this.getForm().find(selector).prop('checked', value).change();
+            break;
+        case 'select':
+            value = (value != null) ? value : -1;
+            var selector = tag + '[name="' + name + '"]';
+            this.getForm().find(selector).val(value).change();
             break;
         default:
             value = (typeof value == 'string') ? value.trim() : value;
             var selector = tag + '[name="' + name + '"]';
-            this.getForm().find(selector).val(value);
+            this.getForm().find(selector).val(value).change();
     }
+};
+
+Formodel.prototype.fillCustom = function (key, callback, value) {
+    callback(key, value, this);
 };
 
 Formodel.prototype.setErrors = function (context, errors) {
@@ -306,6 +324,10 @@ Formodel.prototype.setErrors = function (context, errors) {
 Formodel.prototype.fillWith = function (record) {
     var attributes = this.getAttributes();
     for(var key in attributes){
-        this.fillInput(attributes[key], key, record[key]);
+        if(typeof attributes[key] != 'string'){
+            this.fillCustom(key, attributes[key].set, record[key]);
+        } else {
+            this.fillInput(attributes[key], key, record[key]);
+        }
     }
 };
