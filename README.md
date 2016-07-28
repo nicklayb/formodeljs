@@ -83,10 +83,38 @@ When you are calling the `.get()`, `.new()` or the `.save()` methods. You can pa
 - `targetAfter` : Executed after the request. You'll receive a second parameter which is a boolean if the request succeeded or not. You also receive, as a third parameter, the server response.
 
 ### Error list
-At the instanciation of your Formodel object, you can add the id of a ul element as `errorList` option where you want errors to append and easily be shown. You could also add the `appendError` callback if you want to customize the li appendment. It receive the error and it by default return a `'<li>' + error + '</li>'`
+At the instanciation of your Formodel object, you can add the id of a ul element as `errorList` option where you want errors to append and easily be shown. You could also add the `appendError` anonymous function if you want to customize the li append function. It receive the error and it by default return a `'<li>' + error + '</li>'`. Since Laravel gives a 422 when validations fails, it's default configured to that. You can override this by adding option `errorListCode` with the code you want.
 
 ### Options
 Along the callbacks, you can also customize the following options.
+
+- `model` : By default, the model is set to the `data-model` attribute on your form. However, you can override it by providing it as an option when you build the instance
+ - Type : *String*
+ - Default : Obtained by `$(form).attr('data-model')`
+- `rootUrl` : If your model as a root url (Example `/management/posts`) you can provide it. It'll be appended at the beggining of each request of that model.
+ - Type : *String*
+ - Default : empty string
+- `tokenKey` : If you're using token validation (Such as CSRF). You can provide the key. Laravel use `_token` by default so it's configured that way. However, the token won't be sent to the server if null or empty.
+ - Type :  *String*
+ - Default : `'_token'`
+- `token` : The token that will be sent to the server. It won't be sent if he's empty. It if it is, it'll be sent with the key you provided at option `tokenKey` (By default `_token`).
+ - Type : *String*
+ - Default : empty string
+- `idKey` : If your server requires the model when doing update and get request you can provide it here. Most of the time it'll be `id`.
+ - Type :  *String*
+ - Default : `null`
+- `errorList` : The DOM element that should contains your request errors. It you don't fill it, you won't see errors. (See *Error list* section for more details).
+ - Type : *String* (Must be ID of a DOM ul element)
+ - Default : `null`
+- `clearAfterStore` : A true of false option to set if you want the form to be cleared after a successful store, enabled by defautlt.
+ - Type : *Boolean*
+ - Default : `true`
+- `clearAfterUpdate` : A true of false option to set if you want the form to be cleared after a successful update, enabled by defautlt.
+ - Type : *Boolean*
+ - Default : `true`
+- `usingTemplates` : A true of false option to set if you want to use Templates. The Formodel base object containes an object `templates`, which you can access by `Formodel.templates`, that be use to format targets on request. It is by default configured with Font-awsome icons to make a spinner spin when doing requests.
+ - Type : *Boolean*
+ - Default : `true`
 
 ## Conclusion
 
