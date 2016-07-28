@@ -1,23 +1,28 @@
 function Formodel(options){
     this.form = options.form;
     this.model = options.model || this.getForm().attr('data-model');
+    this.errorListCode = options.errorListCode || 422,
     this.attributes = options.attributes;
     this.rootUrl = options.rootUrl || '';
     this.tokenKey = options.tokenKey || '_token';
     this.token = options.token || '';
+    this.idKey = options.idKey || null;
+    this.errorList = options.errorList || null;
+    this.appendError = options.appendError || this._appendError;
     this.handleUpdate = options.handleUpdate || function(){};
     this.handleStore = options.handleStore || function(){};
     this.handleDelete = options.handleDelete || function(){};
     this.handleGet = options.handleGet || function(){};
+    this.handleNew = options.handleNew || function(){};
     this.handleError = options.handleError || function(){};
     this.handleBeforeSend = options.handleBeforeSend || function(){};
     this.handleSuccess = options.handleSuccess || function(){};
     this.targetBefore = options.targetBefore || function(){};
     this.targetAfter = options.targetAfter || function(){};
-    this.recordId = -1;
     this.clearAfterStore = options.clearAfterStore || true;
     this.clearAfterUpdate = options.clearAfterUpdate || true;
     this.usingTemplates = options.usingTemplates || true;
+    this.recordId = -1;
     this.target = null;
     this.targetOriginal = null;
     this._init();
@@ -47,6 +52,7 @@ Formodel.prototype.get = function (id, target) {
 Formodel.prototype.new = function () {
     this.setRecordId(-1);
     this.clear();
+    this._handleNew(this);
 };
 
 Formodel.prototype.destroy = function (target) {
@@ -65,4 +71,4 @@ Formodel.prototype.save = function(target) {
     } else {
         this._store();
     }
-}
+};

@@ -17,6 +17,20 @@ Formodel.prototype.fillInput = function (tag, name, value) {
     }
 };
 
+Formodel.prototype.setErrors = function (context, errors) {
+    var list = context.getErrorList();
+    list.html('');
+    if(errors !== undefined){
+        $.each(errors, function(i, v){
+            list.append(context.appendError(v[0]));
+        });
+        list.slideDown();
+    }
+    else{
+        list.hide();
+    }
+};
+
 Formodel.prototype.fillWith = function (record) {
     var attributes = this.getAttributes();
     for(var key in attributes){

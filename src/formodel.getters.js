@@ -1,7 +1,11 @@
 Formodel.prototype.getInputValue = function (tag, name) {
     switch (tag.toLowerCase()) {
         case 'checkbox':
+            var selector = 'input[type="' + tag + '"][name="' + name + '"]';
+            return $(selector).prop('checked');
         case 'radio':
+            var selector = 'input[type="' + tag + '"][name="' + name + '"]';
+            return $(selector).val();
             break;
         default:
             var selector = tag + '[name="' + name + '"]';
@@ -9,12 +13,17 @@ Formodel.prototype.getInputValue = function (tag, name) {
     }
 };
 
+Formodel.prototype.getErrorList = function () {
+    return (this.errorList != null) ? $('#' + this.errorList) : null;
+};
+
 Formodel.prototype.getFormData = function (idKey) {
     var data = {},
-        attributes = this.getAttributes();
+        attributes = this.getAttributes(),
+        idKey = (this.idKey !== undefined && this.idKey != null) ? this.idKey : idKey;
     for(var key in attributes){
         var value = this.getInputValue(attributes[key], key);
-        data[key] = value;
+        data[key] = value || null;
     }
     if(idKey !== undefined){
         data[idKey] = this.getRecordId();

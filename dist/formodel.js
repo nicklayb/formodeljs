@@ -1,23 +1,28 @@
 function Formodel(options){
     this.form = options.form;
     this.model = options.model || this.getForm().attr('data-model');
+    this.errorListCode = options.errorListCode || 422,
     this.attributes = options.attributes;
     this.rootUrl = options.rootUrl || '';
     this.tokenKey = options.tokenKey || '_token';
     this.token = options.token || '';
+    this.idKey = options.idKey || null;
+    this.errorList = options.errorList || null;
+    this.appendError = options.appendError || this._appendError;
     this.handleUpdate = options.handleUpdate || function(){};
     this.handleStore = options.handleStore || function(){};
     this.handleDelete = options.handleDelete || function(){};
     this.handleGet = options.handleGet || function(){};
+    this.handleNew = options.handleNew || function(){};
     this.handleError = options.handleError || function(){};
     this.handleBeforeSend = options.handleBeforeSend || function(){};
     this.handleSuccess = options.handleSuccess || function(){};
     this.targetBefore = options.targetBefore || function(){};
     this.targetAfter = options.targetAfter || function(){};
-    this.recordId = -1;
     this.clearAfterStore = options.clearAfterStore || true;
     this.clearAfterUpdate = options.clearAfterUpdate || true;
     this.usingTemplates = options.usingTemplates || true;
+    this.recordId = -1;
     this.target = null;
     this.targetOriginal = null;
     this._init();
@@ -47,6 +52,7 @@ Formodel.prototype.get = function (id, target) {
 Formodel.prototype.new = function () {
     this.setRecordId(-1);
     this.clear();
+    this._handleNew(this);
 };
 
 Formodel.prototype.destroy = function (target) {
@@ -65,7 +71,7 @@ Formodel.prototype.save = function(target) {
     } else {
         this._store();
     }
-}
+};
 
 
 
@@ -77,7 +83,7 @@ Formodel.prototype._ajax = function(url, type, data, handler) {
         type:type,
         data:data,
         beforeSend:function(){
-            context.handleBeforeSend(context);
+            context._handleBeforeSend(context);
             context._targetBefore();
             if(context.usingTemplates){
                 context._setTargetTemplate('loading');
@@ -93,7 +99,7 @@ Formodel.prototype._ajax = function(url, type, data, handler) {
         },
         error:function(response){
             context._targetAfter(false, response);
-            context.handleError(context, response);
+            context._handleError(context, response);
             if(context.usingTemplates){
                 context._setTargetTemplate('error');
             }
@@ -149,10 +155,18 @@ Formodel.prototype._targetBefore = function() {
     this.targetBefore(this.target);
 }
 
+Formodel.prototype._appendError = function (error) {
+    return '<li>' + error + '</li>';
+};
+
 Formodel.prototype.getInputValue = function (tag, name) {
     switch (tag.toLowerCase()) {
         case 'checkbox':
+            var selector = 'input[type="' + tag + '"][name="' + name + '"]';
+            return $(selector).prop('checked');
         case 'radio':
+            var selector = 'input[type="' + tag + '"][name="' + name + '"]';
+            return $(selector).val();
             break;
         default:
             var selector = tag + '[name="' + name + '"]';
@@ -160,12 +174,17 @@ Formodel.prototype.getInputValue = function (tag, name) {
     }
 };
 
+Formodel.prototype.getErrorList = function () {
+    return (this.errorList != null) ? $('#' + this.errorList) : null;
+};
+
 Formodel.prototype.getFormData = function (idKey) {
     var data = {},
-        attributes = this.getAttributes();
+        attributes = this.getAttributes(),
+        idKey = (this.idKey !== undefined && this.idKey != null) ? this.idKey : idKey;
     for(var key in attributes){
         var value = this.getInputValue(attributes[key], key);
-        data[key] = value;
+        data[key] = value || null;
     }
     if(idKey !== undefined){
         data[idKey] = this.getRecordId();
@@ -213,25 +232,42 @@ Formodel.prototype.getRecordId = function () {
 Formodel.prototype._handleUpdate = function(context, response){
     context.handleUpdate(context, response);
     if(context.clearAfterUpdate){
-        context.new();
+        context.clear();
     }
 };
 
 Formodel.prototype._handleStore = function(context, response){
     context.handleStore(context, response);
     if(context.clearAfterStore){
-        context.new();
+        context.clear();
     }
+};
+
+Formodel.prototype._handleNew = function (context) {
+    context.setErrors(context);
+    context.handleNew(context);
 };
 
 Formodel.prototype._handleDelete = function(context, response){
     context.handleDelete(context, response);
-        context.new();
+    context.clear();
 };
 
 Formodel.prototype._handleGet = function (context, response) {
     context.fillWith(response);
     context.handleGet(context, response);
+};
+
+Formodel.prototype._handleError = function (context, response) {
+    if(context.errorList != null && response.status == context.errorListCode){
+        context.setErrors(context, response.responseJSON);
+    }
+    context.handleError(context, response);
+};
+
+Formodel.prototype._handleBeforeSend = function (context) {
+    context.setErrors(context);
+    context.handleBeforeSend(context);
 };
 
 Formodel.prototype.setRecordId = function (id) {
@@ -250,6 +286,20 @@ Formodel.prototype.fillInput = function (tag, name, value) {
             value = (typeof value == 'string') ? value.trim() : value;
             var selector = tag + '[name="' + name + '"]';
             $(selector).val(value);
+    }
+};
+
+Formodel.prototype.setErrors = function (context, errors) {
+    var list = context.getErrorList();
+    list.html('');
+    if(errors !== undefined){
+        $.each(errors, function(i, v){
+            list.append(context.appendError(v[0]));
+        });
+        list.slideDown();
+    }
+    else{
+        list.hide();
     }
 };
 

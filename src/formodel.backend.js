@@ -8,7 +8,7 @@ Formodel.prototype._ajax = function(url, type, data, handler) {
         type:type,
         data:data,
         beforeSend:function(){
-            context.handleBeforeSend(context);
+            context._handleBeforeSend(context);
             context._targetBefore();
             if(context.usingTemplates){
                 context._setTargetTemplate('loading');
@@ -24,7 +24,7 @@ Formodel.prototype._ajax = function(url, type, data, handler) {
         },
         error:function(response){
             context._targetAfter(false, response);
-            context.handleError(context, response);
+            context._handleError(context, response);
             if(context.usingTemplates){
                 context._setTargetTemplate('error');
             }
@@ -79,3 +79,7 @@ Formodel.prototype._targetAfter = function(success, response) {
 Formodel.prototype._targetBefore = function() {
     this.targetBefore(this.target);
 }
+
+Formodel.prototype._appendError = function (error) {
+    return '<li>' + error + '</li>';
+};
