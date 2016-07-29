@@ -115,6 +115,18 @@ Along the callbacks, you can also customize the following options.
 - `usingTemplates` : A true of false option to set if you want to use Templates. The Formodel base object containes an object `templates`, which you can access by `Formodel.templates`, that be use to format targets on request. It is by default configured with Font-awsome icons to make a spinner spin when doing requests.
  - Type : *Boolean*
  - Default : `true`
+- storable : Prevent requests of type store to be submitted.
+ - Type: *Boolean*
+ - Default : `true`
+- updatable : Prevent requests of type update to be submitted.
+ - Type: *Boolean*
+ - Default : `true`
+- deletable : Prevent requests of type delete to be submitted.
+ - Type: *Boolean*
+ - Default : `true`
+- gettable : Prevent requests of type get to be performed.
+ - Type: *Boolean*
+ - Default : `true`
 
 ## Conclusion
 
