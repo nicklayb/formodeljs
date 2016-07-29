@@ -41,7 +41,11 @@ Formodel.templates = {
 Formodel.prototype.clear = function(){
     var attributes = this.getAttributes();
     for(var key in attributes){
-        this.fillInput(attributes[key], key, '');
+        if(typeof attributes[key] != 'string') {
+            attributes[key].clear(this);
+        } else {
+            this.fillInput(attributes[key], key, '');
+        }
     }
 };
 
