@@ -267,7 +267,7 @@ Formodel.prototype._handleGet = function (context, response) {
 };
 
 Formodel.prototype._handleError = function (context, response) {
-    if(context.errorList != null && response.status == context.errorListCode){
+    if(context.getErrorList() != null && response.status == context.errorListCode){
         context.setErrors(context, response.responseJSON);
     }
     context.handleError(context, response);
