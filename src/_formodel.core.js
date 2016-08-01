@@ -22,6 +22,10 @@ function Formodel(options){
     this.clearAfterStore = options.clearAfterStore || true;
     this.clearAfterUpdate = options.clearAfterUpdate || true;
     this.usingTemplates = options.usingTemplates || true;
+    this.storable = options.storable || true;
+    this.updatable = options.updatable || true;
+    this.deletable = options.deletable || true;
+    this.gettable = options.gettable || true;
     this.recordId = -1;
     this.target = null;
     this.targetOriginal = null;
@@ -47,10 +51,14 @@ Formodel.prototype.clear = function(){
 
 Formodel.prototype.get = function (id, target) {
     this.setTarget(target);
-    this.setRecordId(id);
-    var data = this.getAjaxData(),
-        url = this.getUrl(this.getRecordId());
-    this._ajax(url, 'GET', data, this._handleGet);
+    if(this.gettable){
+        this.setRecordId(id);
+        var data = this.getAjaxData(),
+            url = this.getUrl(this.getRecordId());
+        this._ajax(url, 'GET', data, this._handleGet);
+    } else {
+        console.error("equest of type 'get' are not allowed");
+    }
 };
 
 Formodel.prototype.new = function () {
@@ -62,17 +70,29 @@ Formodel.prototype.new = function () {
 Formodel.prototype.destroy = function (target) {
     this.setTarget(target);
     if(this.getRecordId() > -1){
-        var url = this.getUrl(this.getRecordId()),
-            data = this.getFormData();
-        this._ajax(url, 'DELETE', data, this._handleDelete);
+        if(this.deletable){
+            var url = this.getUrl(this.getRecordId()),
+                data = this.getFormData();
+            this._ajax(url, 'DELETE', data, this._handleDelete);
+        } else {
+            console.error("Request of type 'delete' are not allowed");
+        }
     }
 };
 
 Formodel.prototype.save = function(target) {
     this.setTarget(target);
     if(this.getRecordId() > 0){
-        this._update();
+        if(this.updatable){
+            this._update();
+        } else {
+            console.error("Request of type 'update' are not allowed");
+        }
     } else {
-        this._store();
+        if(this.storable){
+            this._store();
+        } else {
+            console.error("Request of type'store' are not allowed");
+        }
     }
 };
