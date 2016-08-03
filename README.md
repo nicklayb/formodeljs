@@ -85,6 +85,37 @@ When you are calling the `.get()`, `.new()` or the `.save()` methods. You can pa
 ### Error list
 At the instanciation of your Formodel object, you can add the id of a ul element as `errorList` option where you want errors to append and easily be shown. You could also add the `appendError` anonymous function if you want to customize the li append function. It receive the error and it by default return a `'<li>' + error + '</li>'`. Since Laravel gives a 422 when validations fails, it's default configured to that. You can override this by adding option `errorListCode` with the code you want.
 
+### Custome data
+Sometime, you will want to pass some special data to your request which are not necessary in your model. To do it, you may use de `otherData` option to add them. I would recommend you to add them using the following methods.
+
+#### Set all the other data
+Use the method `setOtherData` to set **all** of the other datas. Which will overwrite existing data in the object.
+```js
+formodel.setOtherData({
+    someKey: 'some value',
+    anotherStuff: 'awesome stuff'
+});
+```
+
+#### Emptying the other data
+You can use the same method as above (`setOtherData`) but with no parameter. This will set a whole new empty object.
+```js
+formodel.setOtherData();
+```
+
+#### Add a data
+With the method `addOtherData`, you can add unique data by giving key and value. It will append to the existing value.
+```js
+formodel.addOtherData('superKey', 'My super value');
+```
+#### Removing a data
+If you want to remove only one element from the other data, use the `removeOtherData` method and give the key of the required element.
+```js
+formodel.removeOtherData('superKey');
+```
+
+**Make sure to avoid using data with the same key as your model, they'll be overwriten**
+
 ### Options
 Along the callbacks, you can also customize the following options.
 
