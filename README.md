@@ -27,7 +27,7 @@ Download it from the Github repository.
 ## Usage
 
 ### Basic example
-Let's have a blog post form, with a title and a body for example. The only required stuff are the form `id`, the `data-model` attribute, which is your database model. It'll be used to perform any requests. Don't forget to include your model attributes, sur as our `input` title and our `textarea` for the body.
+Let's have a blog post form, with a title and a body for example. The only required stuff are the form `id`, the `data-model` attribute, which is your database model. It'll be used to perform any requests. Don't forget to include your model attributes, such as our `input` title and our `textarea` for the body.
 ```html
 <form id="postForm" data-model="posts">
     <input type="text" name="title">
@@ -36,7 +36,8 @@ Let's have a blog post form, with a title and a body for example. The only requi
 </form>
 ```
 
-To invoke the Formodel object, exectue this in a script tag. You pass in an object for your options. You need at least these two parameters `form` and `attributes`.
+#### Object instanciation
+To invoke the Formodel object, execute this in a script tag. You pass in an object for your options. You need at least these two parameters `form` and `attributes`.
 ```js
     var form = new Formodel({
         form:'postForm',
@@ -46,6 +47,18 @@ To invoke the Formodel object, exectue this in a script tag. You pass in an obje
         }
     });
 ```
+
+#### jQuery instanciation
+You can also invoke the Formodel object by a jQuery extend method called `formodel` like this :
+```js
+    var form = $('#postForm').formodel({
+        attributes: {
+            'title':'input',
+            'body':'textarea'
+        }
+    });
+```
+**You don't have to give the id of the element with jQuery**
 
 And it's done.
 
