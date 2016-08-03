@@ -1,6 +1,6 @@
 {
   "name": "formodeljs",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Javascript library for RESTful api form manipulation with your database model",
   "main": "index.js",
   "scripts": {
