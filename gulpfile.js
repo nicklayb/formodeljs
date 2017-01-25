@@ -3,7 +3,7 @@ var concat = require('gulp-concat');
 var uglify = require('gulp-uglify');
 var rename = require('gulp-rename');
 
-gulp.task('scripts', function(){
+gulp.task('scripts', function() {
     return gulp.src('src/*.js')
         .pipe(concat('formodel.js'))
         .pipe(gulp.dest('dist'))
@@ -14,6 +14,6 @@ gulp.task('scripts', function(){
 
 gulp.task('default', ['scripts']);
 
-gulp.task('watch', function(){
+gulp.task('watch', function() {
     gulp.watch('src/*.js', ['scripts']);
 });
